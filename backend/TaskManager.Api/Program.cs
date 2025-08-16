@@ -1,48 +1,43 @@
-using TaskManager.Api.Services;
+
+using TaskManager.Api.Services;  // Add this line
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-builder.Services.AddControllers();          // Needed for controllers
-builder.Services.AddEndpointsApiExplorer(); // Needed for Swagger
-builder.Services.AddSwaggerGen();           // Swagger generator
-builder.Services.AddSingleton<TaskRepository>(); // In-memory repo
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<TaskRepository>();
 
-// Add CORS services to the container
+// Add CORS policy
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.WithOrigins("http://localhost:4200") // Angular dev server
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
+    options.AddPolicy("AllowAngularApp",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:4200")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();       // Swagger middleware
-    app.UseSwaggerUI();     // Swagger UI at /swagger
-    
-    // In development, we'll disable HTTPS redirection to avoid warnings
-    // since our Angular app is running on HTTP in development
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
-else
-{
-    // In production, enforce HTTPS
-    app.UseHttpsRedirection();
-}
-app.UseRouting();
 
-app.UseCors("AngularApp"); // Use the named policy
+// Use CORS - Must be after UseRouting and before UseAuthorization
+app.UseCors("AllowAngularApp");
 
+app.UseHttpsRedirection();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
