@@ -1,0 +1,51 @@
+<div class="filters">
+  <div class="filter-group">
+    <label for="priorityFilter">Priority:</label>
+    <select id="priorityFilter" [(ngModel)]="priorityFilter" (change)="onFilterChange()">
+      <option value="All">All</option>
+      <option value="High">High</option>
+      <option value="Medium">Medium</option>
+      <option value="Low">Low</option>
+    </select>
+  </div>
+
+  <div class="filter-group">
+    <label for="completionFilter">Status:</label>
+    <select id="completionFilter" [(ngModel)]="completionFilter" (change)="onFilterChange()">
+      <option value="All">All</option>
+      <option value="Completed">Completed</option>
+      <option value="Pending">Pending</option>
+    </select>
+  </div>
+</div>
+
+<div class="task-list">
+  @if (filteredTasks.length === 0) {
+    <div class="no-tasks">
+      No tasks found with the current filters.
+    </div>
+  }
+
+  @for (task of filteredTasks; track task.id) {
+    <div class="task-item" [class.completed]="task.isCompleted">
+      <div class="task-info">
+        <h3>{{ task.title }}</h3>
+        <span class="priority-badge" [class.high]="task.priority === 'High'" 
+                                  [class.medium]="task.priority === 'Medium'" 
+                                  [class.low]="task.priority === 'Low'">
+          {{ task.priority }}
+        </span>
+      </div>
+      <div class="task-actions">
+        @if (!task.isCompleted) {
+          <button (click)="markAsCompleted(task.id!)" class="complete-btn">
+            Mark Complete
+          </button>
+        }
+        @if (task.isCompleted) {
+          <span class="completed-text">✓ Completed</span>
+        }
+      </div>
+    </div>
+  }
+</div>

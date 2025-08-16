@@ -1,0 +1,19 @@
+<!-- src/app/task-form/task-form.component.html -->
+<form [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="task-form">
+  <div class="form-group">
+    <label for="title">Task Title</label>
+    <input type="text" id="title" formControlName="title" placeholder="Enter task title">
+    <div *ngIf="taskForm.get('title')?.invalid && taskForm.get('title')?.touched" class="error-message">
+      Title is required
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="priority">Priority</label>
+    <select id="priority" formControlName="priority">
+      <option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option>
+    </select>
+  </div>
+
+  <button type="submit" [disabled]="taskForm.invalid" class="submit-btn">Add Task</button>
+</form>
