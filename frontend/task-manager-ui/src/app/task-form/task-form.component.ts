@@ -5,6 +5,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Task } from '../task.model';
+import { HttpClient } from '@angular/common/http';
+import { TaskRefreshService } from '../task-refresh.service';
 
 @Component({
   selector: 'app-task-form',
@@ -20,7 +22,7 @@ export class TaskFormComponent {
   message: string = '';
   messageType: 'success' | 'error' | '' = '';
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private taskRefresh: TaskRefreshService) {
     this.taskForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(1)]],
       priority: ['Medium', Validators.required]
@@ -29,25 +31,26 @@ export class TaskFormComponent {
 
   onSubmit(): void {
     if (this.taskForm.valid) {
-      const allTasks: Task[] = JSON.parse(localStorage.getItem('tasks') || '[]');
       const newTask: Task = {
-        id: this.generateId(allTasks),
         title: this.taskForm.value.title,
         priority: this.taskForm.value.priority,
-        isCompleted: false,
-        deleted: false
+        isCompleted: false
       };
-      allTasks.push(newTask);
-      localStorage.setItem('tasks', JSON.stringify(allTasks));
-      this.taskForm.reset({ priority: 'Medium' });
-      this.taskAdded.emit();
-      this.showMessage('Task created successfully!', 'success');
+  this.http.post('/tasks', newTask).subscribe({
+        next: () => {
+          this.taskForm.reset({ priority: 'Medium' });
+          this.taskAdded.emit();
+          this.taskRefresh.trigger();
+          this.showMessage('Task created successfully!', 'success');
+        },
+        error: () => {
+          this.showMessage('Failed to add task (backend error)', 'error');
+        }
+      });
     }
   }
 
-  generateId(tasks: Task[]): number {
-    return tasks.length > 0 ? Math.max(...tasks.map(t => t.id || 0)) + 1 : 1;
-  }
+  // No need for generateId when using backend
 
   showMessage(msg: string, type: 'success' | 'error') {
     this.message = msg;

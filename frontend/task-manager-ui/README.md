@@ -1,59 +1,63 @@
-# TaskManagerUi
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.15.
+# Task Manager
 
-## Development server
+A simple full-stack Task Manager application built with Angular (frontend) and ASP.NET Core (backend).
 
-To start a local development server, run:
+## Features
+- Add, view, and complete tasks
+- Task priorities (High, Medium, Low)
+- Real-time task list updates
+- Modern, responsive UI
 
-```bash
-ng serve
+## Project Structure
+
+```
+Task-Manager1/
+├── backend/
+│   └── TaskManager.Api/         # ASP.NET Core Web API
+│       ├── Controllers/
+│       ├── Models/
+│       ├── Services/
+│       └── ...
+└── frontend/
+	├── proxy.conf.json          # Angular proxy config
+	└── task-manager-ui/         # Angular app
+		├── src/app/
+		└── ...
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Prerequisites
+- Node.js (LTS recommended)
+- .NET 9 SDK
+- Angular CLI
 
-## Code scaffolding
+## Getting Started
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+### 1. Start the Backend
+```sh
+cd backend/TaskManager.Api
+# Run with HTTP (recommended for local dev)
+dotnet run --launch-profile http
 ```
+The backend will be available at http://localhost:5210
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
+### 2. Start the Frontend
+```sh
+cd frontend/task-manager-ui
+npm install
+ng serve --proxy-config ../proxy.conf.json
 ```
+The frontend will be available at http://localhost:4200
 
-## Building
+## API Endpoints
+- `GET /tasks` - Get all tasks
+- `POST /tasks` - Add a new task
+- `PUT /tasks/{id}` - Mark a task as completed
 
-To build the project run:
+## Troubleshooting
+- Make sure the backend is running on the same port as specified in `proxy.conf.json` (default: 5210)
+- Always use `/tasks` (not a full URL) in frontend API calls
+- If you see CORS or 404 errors, check that both servers are running and the proxy config is correct
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## License
+MIT

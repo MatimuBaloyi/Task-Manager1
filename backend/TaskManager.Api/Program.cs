@@ -1,8 +1,7 @@
-
-using TaskManager.Api.Services;  // Add this line
+using TaskManager.Api.Controllers;  // Add this line
+using TaskManager.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +9,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<TaskRepository>();
 
 // Add CORS policy
 builder.Services.AddCors(options =>
@@ -33,9 +31,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Use CORS - Must be after UseRouting and before UseAuthorization
 app.UseCors("AllowAngularApp");
-
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
