@@ -1,5 +1,8 @@
-<!-- src/app/task-form/task-form.component.html -->
 <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="task-form">
+  @if (showSuccess) {
+    <div class="success-message">Task added successfully!</div>
+  }
+  
   <div class="form-group">
     <label for="title">Task Title</label>
     <input type="text" id="title" formControlName="title" placeholder="Enter task title">
@@ -13,6 +16,11 @@
     <select id="priority" formControlName="priority">
       <option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option>
     </select>
+  </div>
+
+  <div class="form-group">
+    <label for="dueDate">Due Date (optional)</label>
+    <input type="date" id="dueDate" formControlName="dueDate">
   </div>
 
   <button type="submit" [disabled]="taskForm.invalid" class="submit-btn">Add Task</button>

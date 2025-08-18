@@ -15,14 +15,12 @@ namespace TaskManager.Api.Controllers
             _repo = repo;
         }
 
-        // GET /tasks
         [HttpGet]
         public ActionResult<IEnumerable<TaskItem>> GetAll()
         {
             return Ok(_repo.GetAll());
         }
 
-        // POST /tasks
         [HttpPost]
         public ActionResult<TaskItem> Create([FromBody] TaskItem task)
         {
@@ -36,13 +34,39 @@ namespace TaskManager.Api.Controllers
             return CreatedAtAction(nameof(GetAll), new { id = created.Id }, created);
         }
 
-        // PUT /tasks/{id}
         [HttpPut("{id}")]
         public IActionResult MarkCompleted(int id)
         {
             var success = _repo.MarkCompleted(id);
             if (!success) return NotFound("Task not found.");
+            return NoContent();
+        }
 
+        // Add these new endpoints
+        [HttpPut("update/{id}")]
+        public IActionResult UpdateTask(int id, [FromBody] TaskItem task)
+        {
+            if (id != task.Id)
+                return BadRequest("ID mismatch");
+
+            var success = _repo.Update(task);
+            if (!success) return NotFound("Task not found.");
+            return NoContent();
+        }
+
+        [HttpDelete("soft-delete/{id}")]
+        public IActionResult SoftDelete(int id)
+        {
+            var success = _repo.SoftDelete(id);
+            if (!success) return NotFound("Task not found.");
+            return NoContent();
+        }
+
+        [HttpPut("restore/{id}")]
+        public IActionResult Restore(int id)
+        {
+            var success = _repo.Restore(id);
+            if (!success) return NotFound("Task not found or not deleted.");
             return NoContent();
         }
     }

@@ -1,8 +1,11 @@
 <div class="filters">
   <div class="filter-group">
-    <label for="priorityFilter">Priority:</label>
-    <select id="priorityFilter" [(ngModel)]="priorityFilter" (change)="onFilterChange()">
-      <option value="All">All</option>
+    <label for="priorityFilter" id="priorityFilterLabel">Priority Filter:</label>
+    <select id="priorityFilter" 
+            [(ngModel)]="priorityFilter" 
+            (change)="onFilterChange()"
+            aria-labelledby="priorityFilterLabel">
+      <option value="All">All Priorities</option>
       <option value="High">High</option>
       <option value="Medium">Medium</option>
       <option value="Low">Low</option>
@@ -10,42 +13,136 @@
   </div>
 
   <div class="filter-group">
-    <label for="completionFilter">Status:</label>
-    <select id="completionFilter" [(ngModel)]="completionFilter" (change)="onFilterChange()">
-      <option value="All">All</option>
+    <label for="completionFilter" id="completionFilterLabel">Status Filter:</label>
+    <select id="completionFilter" 
+            [(ngModel)]="completionFilter" 
+            (change)="onFilterChange()"
+            aria-labelledby="completionFilterLabel">
+      <option value="All">All Statuses</option>
       <option value="Completed">Completed</option>
       <option value="Pending">Pending</option>
     </select>
   </div>
+
+  <button type="button" 
+          (click)="toggleShowDeleted()" 
+          class="toggle-deleted-btn"
+          [attr.aria-pressed]="showDeleted"
+          aria-label="Toggle deleted tasks visibility">
+    {{ showDeleted ? 'Hide Deleted Tasks' : 'Show Deleted Tasks' }}
+  </button>
 </div>
 
 <div class="task-list">
   @if (filteredTasks.length === 0) {
-    <div class="no-tasks">
+    <div class="no-tasks" aria-live="polite">
       No tasks found with the current filters.
     </div>
   }
 
   @for (task of filteredTasks; track task.id) {
-    <div class="task-item" [class.completed]="task.isCompleted">
-      <div class="task-info">
-        <h3>{{ task.title }}</h3>
-        <span class="priority-badge" [class.high]="task.priority === 'High'" 
-                                  [class.medium]="task.priority === 'Medium'" 
-                                  [class.low]="task.priority === 'Low'">
-          {{ task.priority }}
-        </span>
-      </div>
-      <div class="task-actions">
-        @if (!task.isCompleted) {
-          <button (click)="markAsCompleted(task.id!)" class="complete-btn">
-            Mark Complete
-          </button>
-        }
-        @if (task.isCompleted) {
-          <span class="completed-text">✓ Completed</span>
-        }
-      </div>
+    <div class="task-item" 
+         [class.completed]="task.isCompleted" 
+         [class.deleted]="task.isDeleted"
+         [attr.aria-current]="editingTask?.id === task.id ? 'true' : null">
+      @if (editingTask?.id === task.id) {
+        <form class="edit-form" (ngSubmit)="saveEdit()">
+          <div class="form-group">
+            <label for="editTitle-{{task.id}}">Task Title</label>
+            <input type="text" 
+                   id="editTitle-{{task.id}}" 
+                   [(ngModel)]="editingTask.title" 
+                   name="editTitle"
+                   placeholder="Enter task title"
+                   required
+                   aria-required="true">
+          </div>
+
+          <div class="form-group">
+            <label for="editPriority-{{task.id}}">Priority</label>
+            <select id="editPriority-{{task.id}}" 
+                    [(ngModel)]="editingTask.priority" 
+                    name="editPriority"
+                    required
+                    aria-required="true">
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="editDueDate-{{task.id}}">Due Date</label>
+            <input type="date" 
+                   id="editDueDate-{{task.id}}" 
+                   [(ngModel)]="editingTask.dueDate" 
+                   name="editDueDate">
+          </div>
+
+          <div class="edit-actions">
+            <button type="submit" class="save-btn" aria-label="Save changes">Save</button>
+            <button type="button" (click)="cancelEdit()" class="cancel-btn" aria-label="Cancel editing">Cancel</button>
+          </div>
+        </form>
+      } @else {
+        <div class="task-info">
+          <h3>{{ task.title }}</h3>
+          <div class="task-meta">
+            <span class="priority-badge" 
+                  [class.high]="task.priority === 'High'" 
+                  [class.medium]="task.priority === 'Medium'" 
+                  [class.low]="task.priority === 'Low'"
+                  aria-label="Priority: {{task.priority}}">
+              {{ task.priority }}
+            </span>
+            @if (task.dueDate) {
+              <span class="due-date" aria-label="Due date: {{ task.dueDate | date:'fullDate' }}">
+                <i class="calendar-icon" aria-hidden="true">📅</i>
+                {{ task.dueDate | date }}
+              </span>
+            }
+          </div>
+        </div>
+        <div class="task-actions">
+          @if (!task.isDeleted) {
+            @if (!task.isCompleted) {
+              <button type="button" 
+                      (click)="markAsCompleted(task.id!)" 
+                      class="complete-btn"
+                      aria-label="Mark '{{task.title}}' as completed">
+                Mark Complete
+              </button>
+            }
+            <button type="button" 
+                    (click)="startEdit(task)" 
+                    class="edit-btn"
+                    aria-label="Edit '{{task.title}}'">
+              Edit
+            </button>
+            <button type="button" 
+                    (click)="deleteTask(task.id!)" 
+                    class="delete-btn"
+                    aria-label="Delete '{{task.title}}'">
+              Delete
+            </button>
+          } @else {
+            <button type="button" 
+                    (click)="restoreTask(task.id!)" 
+                    class="restore-btn"
+                    aria-label="Restore '{{task.title}}'">
+              Restore
+            </button>
+          }
+          @if (task.isCompleted) {
+            <span class="completed-text" aria-hidden="true">✓ Completed</span>
+            <span class="sr-only">Completed</span>
+          }
+        </div>
+      }
     </div>
   }
+</div>
+
+<div aria-live="polite" class="sr-only">
+  <!-- Screen reader announcements will go here -->
 </div>
