@@ -1,8 +1,3 @@
-
-# Task Manager
-
-A simple full-stack Task Manager application built with Angular (frontend) and ASP.NET Core (backend).
-
 ## Features
 - Add, view, and complete tasks
 - Task priorities (High, Medium, Low)
