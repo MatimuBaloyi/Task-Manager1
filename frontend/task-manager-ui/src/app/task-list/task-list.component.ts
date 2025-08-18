@@ -2,7 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TaskService } from '../task.service';
+
 import { Task } from '../task.model';
 
 @Component({
@@ -12,23 +12,28 @@ import { Task } from '../task.model';
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.css']
 })
+
 export class TaskListComponent implements OnInit {
   tasks: Task[] = [];
   filteredTasks: Task[] = [];
+  deletedTasks: Task[] = [];
+  showRecycleBin: boolean = false;
   priorityFilter: string = 'All';
   completionFilter: string = 'All';
+  message: string = '';
+  messageType: 'success' | 'error' | '' = '';
 
-  constructor(private taskService: TaskService) { }
+  constructor() { }
 
   ngOnInit(): void {
     this.loadTasks();
   }
 
   loadTasks(): void {
-    this.taskService.getTasks().subscribe(tasks => {
-      this.tasks = tasks;
-      this.applyFilters();
-    });
+    const allTasks: Task[] = JSON.parse(localStorage.getItem('tasks') || '[]');
+    this.tasks = allTasks.filter(t => !t.deleted);
+    this.deletedTasks = allTasks.filter(t => t.deleted);
+    this.applyFilters();
   }
 
   applyFilters(): void {
@@ -46,12 +51,48 @@ export class TaskListComponent implements OnInit {
   }
 
   markAsCompleted(id: number): void {
-    this.taskService.markAsCompleted(id).subscribe(() => {
-      const task = this.tasks.find(t => t.id === id);
-      if (task) {
-        task.isCompleted = true;
-      }
-      this.applyFilters();
-    });
+    const allTasks: Task[] = JSON.parse(localStorage.getItem('tasks') || '[]');
+    const task = allTasks.find(t => t.id === id);
+    if (task) {
+      task.isCompleted = true;
+      localStorage.setItem('tasks', JSON.stringify(allTasks));
+      this.loadTasks();
+      this.showMessage('Task marked as completed!', 'success');
+    }
+  }
+
+  deleteTask(id: number): void {
+    const allTasks: Task[] = JSON.parse(localStorage.getItem('tasks') || '[]');
+    const task = allTasks.find(t => t.id === id);
+    if (task) {
+      task.deleted = true;
+      localStorage.setItem('tasks', JSON.stringify(allTasks));
+      this.loadTasks();
+      this.showMessage('Task moved to recycle bin.', 'success');
+    }
+  }
+
+  restoreTask(id: number): void {
+    const allTasks: Task[] = JSON.parse(localStorage.getItem('tasks') || '[]');
+    const task = allTasks.find(t => t.id === id);
+    if (task) {
+      task.deleted = false;
+      localStorage.setItem('tasks', JSON.stringify(allTasks));
+      this.loadTasks();
+      this.showMessage('Task restored!', 'success');
+    }
+  }
+
+  toggleRecycleBin(): void {
+    this.showRecycleBin = !this.showRecycleBin;
+  }
+
+  showMessage(msg: string, type: 'success' | 'error') {
+    this.message = msg;
+    this.messageType = type;
+    setTimeout(() => {
+      this.message = '';
+      this.messageType = '';
+    }, 2000);
   }
 }

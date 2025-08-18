@@ -2,13 +2,23 @@
 /* src/styles.css */
 /* Global styles */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f0f2f5;
-  color: #333;
+  background: linear-gradient(120deg, #f8fafc 0%, #e9ecef 100%);
+  color: #222;
+  min-height: 100vh;
 }
 
 * {
   box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #e9ecef;
+}
+::-webkit-scrollbar-thumb {
+  background: #cfd8dc;
+  border-radius: 4px;
 }

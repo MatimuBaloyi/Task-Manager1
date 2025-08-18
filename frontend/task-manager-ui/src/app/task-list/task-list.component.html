@@ -1,4 +1,5 @@
 <div class="filters">
+  <button (click)="toggleRecycleBin()" style="margin-right: 18px; padding: 8px 18px; border-radius: 6px; border: none; background: linear-gradient(90deg, #ff5858 0%, #7b61ff 100%); color: #fff; font-weight: 600; cursor: pointer; box-shadow: 0 1.5px 6px 0 rgba(123,97,255,0.08);">{{ showRecycleBin ? 'Back to Tasks' : 'Recycle Bin' }}</button>
   <div class="filter-group">
     <label for="priorityFilter">Priority:</label>
     <select id="priorityFilter" [(ngModel)]="priorityFilter" (change)="onFilterChange()">
@@ -19,7 +20,9 @@
   </div>
 </div>
 
-<div class="task-list">
+<div *ngIf="message" [ngClass]="{'success-message': messageType === 'success', 'error-message': messageType === 'error'}" style="margin-bottom: 16px; text-align:center; font-weight:600;">{{ message }}</div>
+
+<div class="task-list" *ngIf="!showRecycleBin">
   @if (filteredTasks.length === 0) {
     <div class="no-tasks">
       No tasks found with the current filters.
@@ -42,10 +45,31 @@
             Mark Complete
           </button>
         }
+        <button (click)="deleteTask(task.id!)" style="margin-left:10px; background:linear-gradient(90deg,#ff5858 0%,#7b61ff 100%);">Delete</button>
         @if (task.isCompleted) {
           <span class="completed-text">✓ Completed</span>
         }
       </div>
     </div>
   }
+</div>
+
+<div class="task-list" *ngIf="showRecycleBin">
+  <div style="font-size:1.1em; font-weight:600; margin-bottom:12px;">Recycle Bin</div>
+  <div *ngIf="deletedTasks.length === 0" class="no-tasks">Recycle bin is empty.</div>
+  <div *ngFor="let task of deletedTasks; trackBy: task.id">
+    <div class="task-item">
+      <div class="task-info">
+        <h3>{{ task.title }}</h3>
+        <span class="priority-badge" [class.high]="task.priority === 'High'" 
+                                  [class.medium]="task.priority === 'Medium'" 
+                                  [class.low]="task.priority === 'Low'">
+          {{ task.priority }}
+        </span>
+      </div>
+      <div class="task-actions">
+        <button (click)="restoreTask(task.id!)" style="background:linear-gradient(90deg,#43c6ac 0%,#7b61ff 100%);">Restore</button>
+      </div>
+    </div>
+  </div>
 </div>

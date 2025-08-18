@@ -1,5 +1,6 @@
-<!-- src/app/task-form/task-form.component.html -->
+<!-- src/app/task-form/task-form.compo`nent.html -->
 <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="task-form">
+  <div *ngIf="message" [ngClass]="{'success-message': messageType === 'success', 'error-message': messageType === 'error'}" style="margin-bottom: 16px; text-align:center; font-weight:600;">{{ message }}</div>
   <div class="form-group">
     <label for="title">Task Title</label>
     <input type="text" id="title" formControlName="title" placeholder="Enter task title">

@@ -4,7 +4,6 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { TaskService } from '../task.service';
 import { Task } from '../task.model';
 
 @Component({
@@ -18,8 +17,10 @@ export class TaskFormComponent {
   @Output() taskAdded = new EventEmitter<void>();
   taskForm: FormGroup;
   priorities = ['High', 'Medium', 'Low'];
+  message: string = '';
+  messageType: 'success' | 'error' | '' = '';
 
-  constructor(private fb: FormBuilder, private taskService: TaskService) {
+  constructor(private fb: FormBuilder) {
     this.taskForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(1)]],
       priority: ['Medium', Validators.required]
@@ -28,21 +29,32 @@ export class TaskFormComponent {
 
   onSubmit(): void {
     if (this.taskForm.valid) {
+      const allTasks: Task[] = JSON.parse(localStorage.getItem('tasks') || '[]');
       const newTask: Task = {
+        id: this.generateId(allTasks),
         title: this.taskForm.value.title,
         priority: this.taskForm.value.priority,
-        isCompleted: false
+        isCompleted: false,
+        deleted: false
       };
-
-      this.taskService.createTask(newTask).subscribe({
-        next: () => {
-          this.taskForm.reset({ priority: 'Medium' });
-          this.taskAdded.emit();
-        },
-        error: (err) => {
-          console.error('Error creating task:', err);
-        }
-      });
+      allTasks.push(newTask);
+      localStorage.setItem('tasks', JSON.stringify(allTasks));
+      this.taskForm.reset({ priority: 'Medium' });
+      this.taskAdded.emit();
+      this.showMessage('Task created successfully!', 'success');
     }
+  }
+
+  generateId(tasks: Task[]): number {
+    return tasks.length > 0 ? Math.max(...tasks.map(t => t.id || 0)) + 1 : 1;
+  }
+
+  showMessage(msg: string, type: 'success' | 'error') {
+    this.message = msg;
+    this.messageType = type;
+    setTimeout(() => {
+      this.message = '';
+      this.messageType = '';
+    }, 2000);
   }
 }
